@@ -13,8 +13,16 @@ module.exports = (...methods) => async (req, res, next) => {
     try {
       fnResult = matchingMethod.fn()
     } catch (error) {
-      // handle sync expected failure
-      return next(error)
+      if (error.handled) {
+        // send handled error
+        res.status(400).send({
+          error: error.message,
+        })
+      } else {
+        // pass off unhandled error to middleware
+        next(error)
+      }
+      return
     }
     if (fnResult.then) {
       // handle async

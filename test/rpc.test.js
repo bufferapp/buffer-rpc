@@ -88,7 +88,7 @@ describe('rpc', () => {
     expect(body).toEqual({ result })
   })
 
-  it('should handle request to a method with an unexpected failing async function', async () => {
+  it('should handle request to a method with an unhandled failing async function', async () => {
     expect.assertions(2)
     const name = 'name'
     const errorMessage = 'nope'
@@ -119,7 +119,7 @@ describe('rpc', () => {
     }
   })
 
-  it('should handle request to a method with expected failing function', async () => {
+  it('should handle request to a method with an unhandled failing function', async () => {
     expect.assertions(2)
     const name = 'name'
     const errorMessage = 'nope'
@@ -144,6 +144,33 @@ describe('rpc', () => {
       })
     } catch (error) {
       expect(error.statusCode).toBe(500)
+      expect(error.error).toEqual({
+        error: errorMessage,
+      })
+    }
+  })
+
+  it('should handle request to a method with a handled failing function', async () => {
+    expect.assertions(2)
+    const name = 'name'
+    const errorMessage = 'nope'
+    const fn = () => {
+      const error = new Error(errorMessage)
+      error.handled = true
+      throw error
+    }
+    const method = {
+      name,
+      fn,
+    }
+    try {
+      let url = await listen(createServer(rpc(method)))
+      await generateRequest({
+        url,
+        name,
+      })
+    } catch (error) {
+      expect(error.statusCode).toBe(400)
       expect(error.error).toEqual({
         error: errorMessage,
       })
