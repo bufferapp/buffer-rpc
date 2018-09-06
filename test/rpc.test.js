@@ -5,10 +5,13 @@ const bodyParser = require('body-parser')
 const request = require('request-promise')
 const rpc = require('../src/rpc')
 
-const createServer = handler => {
+const createServer = (handler, errorHandler) => {
   const app = express()
   app.use(bodyParser.json())
   app.post('*', handler)
+  if (errorHandler) {
+    app.use(errorHandler)
+  }
   return http.createServer(app)
 }
 
@@ -83,5 +86,36 @@ describe('rpc', () => {
       name,
     })
     expect(body).toEqual({ result })
+  })
+
+  it('should handle request to a method with an unexpected failing async function', async () => {
+    expect.assertions(2)
+    const name = 'name'
+    const errorMessage = 'nope'
+    const fn = async () => {
+      throw new Error(errorMessage)
+    }
+    const method = {
+      name,
+      fn,
+    }
+    const errorHandler = (error, req, res, next) => {
+      if (res.headersSent) {
+        return next(error)
+      }
+      res.status(500).send({ error: error.message })
+    }
+    try {
+      let url = await listen(createServer(rpc(method), errorHandler))
+      await generateRequest({
+        url,
+        name,
+      })
+    } catch (error) {
+      expect(error.statusCode).toBe(500)
+      expect(error.error).toEqual({
+        error: errorMessage,
+      })
+    }
   })
 })

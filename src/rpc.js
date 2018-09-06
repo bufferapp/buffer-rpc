@@ -1,4 +1,4 @@
-module.exports = (...methods) => async (req, res) => {
+module.exports = (...methods) => async (req, res, next) => {
   const { name } = req.body
   const matchingMethod = methods.find(method => method.name === name)
   if (name === 'methods') {
@@ -11,7 +11,7 @@ module.exports = (...methods) => async (req, res) => {
   } else if (matchingMethod) {
     const fnResult = matchingMethod.fn()
     if (fnResult.then) {
-      fnResult.then(result => res.send({ result }))
+      fnResult.then(result => res.send({ result })).catch(error => next(error))
     } else {
       res.send({ result: fnResult })
     }
