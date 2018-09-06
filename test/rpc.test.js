@@ -1,4 +1,5 @@
 const listen = require('test-listen')
+const request = require('request-promise')
 const { createServer, generateRequest } = require('./utils')
 const rpc = require('../src/rpc')
 
@@ -208,5 +209,26 @@ describe('rpc', () => {
         error: errorMessage,
       })
     }
+  })
+
+  it('should handle a request with name in header', async () => {
+    const name = 'name'
+    const result = 'hello, world'
+    const fn = () => result
+    const method = {
+      name,
+      fn,
+    }
+    let url = await listen(createServer(rpc(method)))
+    const body = await request({
+      uri: url,
+      method: 'POST',
+      headers: {
+        'x-buffer-rpc-name': name,
+      },
+      json: true,
+    })
+
+    expect(body).toEqual({ result })
   })
 })

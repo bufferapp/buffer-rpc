@@ -1,5 +1,6 @@
 module.exports = (...methods) => (req, res, next) => {
-  const { name } = req.body
+  const { name: bodyName } = req.body
+  const name = req.headers['x-buffer-rpc-name'] || bodyName
   const matchingMethod = methods.find(method => method.name === name)
   if (name === 'methods') {
     res.send([
