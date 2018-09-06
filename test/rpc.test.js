@@ -51,4 +51,21 @@ describe('rpc', () => {
       },
     ])
   })
+  it('should handle a request to a new method', async () => {
+    const name = 'name'
+    const result = 'hello, world'
+    const fn = jest.fn(() => result)
+    const method = {
+      name,
+      fn,
+    }
+    let url = await listen(createServer(rpc(method)))
+    const body = await generateRequest({
+      url,
+      name,
+    })
+
+    expect(body).toEqual({ result })
+    expect(fn).toBeCalled()
+  })
 })
