@@ -1,4 +1,4 @@
-module.exports = (...methods) => async (req, res, next) => {
+module.exports = (...methods) => (req, res, next) => {
   const { name } = req.body
   const matchingMethod = methods.find(method => method.name === name)
   if (name === 'methods') {
