@@ -9,4 +9,15 @@ describe('createError', () => {
     expect(error.message).toBe(message)
     expect(error.statusCode).toBe(400)
   })
+
+  it('should create an error with a custom status code', () => {
+    const message = 'some error'
+    const statusCode = 401
+    const error = createError({
+      message,
+      statusCode,
+    })
+    expect(error.message).toBe(message)
+    expect(error.statusCode).toBe(statusCode)
+  })
 })
