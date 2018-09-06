@@ -1,4 +1,9 @@
 module.exports = (...methods) => (req, res, next) => {
+  if (!req.body) {
+    return next(
+      new Error('no req.body found, is app.use(bodyParser.json()) hooked up?'),
+    )
+  }
   const { name: bodyName, args } = req.body
   const name = req.headers['x-buffer-rpc-name'] || bodyName
   const matchingMethod = methods.find(method => method.name === name)

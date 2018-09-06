@@ -1,4 +1,6 @@
+const http = require('http')
 const listen = require('test-listen')
+const express = require('express')
 const request = require('request-promise')
 const { createServer, generateRequest } = require('./utils')
 const rpc = require('../src/rpc')
@@ -264,5 +266,30 @@ describe('rpc', () => {
     })
 
     expect(body).toEqual({ result: 4 })
+  })
+
+  it('should fail if parsed body is missing', async () => {
+    expect.assertions(2)
+    const app = express()
+    app.post('*', rpc())
+    app.use((error, req, res, next) => {
+      if (res.headersSent) {
+        return next(error)
+      }
+      res.status(500).send({ error: error.message })
+    })
+    const server = http.createServer(app)
+    let url = await listen(server)
+    try {
+      await generateRequest({
+        url,
+        name: 'methods',
+      })
+    } catch (error) {
+      expect(error.statusCode).toBe(500)
+      expect(error.error).toEqual({
+        error: 'no req.body found, is app.use(bodyParser.json()) hooked up?',
+      })
+    }
   })
 })
