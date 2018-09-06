@@ -9,7 +9,12 @@ module.exports = (...methods) => async (req, res) => {
       },
     ])
   } else if (matchingMethod) {
-    res.send({ result: matchingMethod.fn() })
+    const fnResult = matchingMethod.fn()
+    if (fnResult.then) {
+      fnResult.then(result => res.send({ result }))
+    } else {
+      res.send({ result: fnResult })
+    }
   } else {
     res.status(404).send({
       error: 'unknown method',
