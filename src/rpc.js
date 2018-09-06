@@ -26,7 +26,15 @@ module.exports = (...methods) => async (req, res, next) => {
     }
     if (fnResult.then) {
       // handle async
-      fnResult.then(result => res.send({ result })).catch(error => next(error))
+      fnResult.then(result => res.send({ result })).catch(error => {
+        if (error.handled) {
+          res.status(400).send({
+            error: error.message,
+          })
+        } else {
+          next(error)
+        }
+      })
     } else {
       res.send({ result: fnResult })
     }

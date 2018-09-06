@@ -176,4 +176,31 @@ describe('rpc', () => {
       })
     }
   })
+
+  it('should handle request to a method with a handled async failing function', async () => {
+    expect.assertions(2)
+    const name = 'name'
+    const errorMessage = 'nope'
+    const fn = async () => {
+      const error = new Error(errorMessage)
+      error.handled = true
+      throw error
+    }
+    const method = {
+      name,
+      fn,
+    }
+    try {
+      let url = await listen(createServer(rpc(method)))
+      await generateRequest({
+        url,
+        name,
+      })
+    } catch (error) {
+      expect(error.statusCode).toBe(400)
+      expect(error.error).toEqual({
+        error: errorMessage,
+      })
+    }
+  })
 })
