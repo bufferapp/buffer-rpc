@@ -9,35 +9,30 @@ module.exports = (...methods) => async (req, res, next) => {
       },
     ])
   } else if (matchingMethod) {
-    let fnResult
+    let promise
     try {
       fnResult = matchingMethod.fn()
+      // if async function set it to the promise
+      if (fnResult.then) {
+        promise = fnResult
+      } else {
+        // if sync function wrap in a resolved promise
+        promise = Promise.resolve(fnResult)
+      }
     } catch (error) {
+      // sync failure, wrap in a rejected promise
+      promise = Promise.reject(error)
+    }
+    // handle request the same for sync or async
+    promise.then(result => res.send({ result })).catch(error => {
       if (error.handled) {
-        // send handled error
         res.status(400).send({
           error: error.message,
         })
       } else {
-        // pass off unhandled error to middleware
         next(error)
       }
-      return
-    }
-    if (fnResult.then) {
-      // handle async
-      fnResult.then(result => res.send({ result })).catch(error => {
-        if (error.handled) {
-          res.status(400).send({
-            error: error.message,
-          })
-        } else {
-          next(error)
-        }
-      })
-    } else {
-      res.send({ result: fnResult })
-    }
+    })
   } else {
     res.status(404).send({
       error: 'unknown method',
