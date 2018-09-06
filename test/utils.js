@@ -13,12 +13,13 @@ const createServer = (handler, errorHandler) => {
   return http.createServer(app)
 }
 
-const generateRequest = ({ url, name }) =>
+const generateRequest = ({ url, name, args }) =>
   request({
     uri: url,
     method: 'POST',
     body: {
       name,
+      args: JSON.stringify(args),
     },
     json: true,
   })

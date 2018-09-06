@@ -231,4 +231,21 @@ describe('rpc', () => {
 
     expect(body).toEqual({ result })
   })
+
+  it('should handle a request with arguments', async () => {
+    const name = 'name'
+    const fn = (a, b) => a + b
+    const method = {
+      name,
+      fn,
+    }
+    let url = await listen(createServer(rpc(method)))
+    const body = await generateRequest({
+      url,
+      name,
+      args: [2, 2],
+    })
+
+    expect(body).toEqual({ result: 4 })
+  })
 })
