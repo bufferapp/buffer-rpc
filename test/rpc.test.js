@@ -248,4 +248,21 @@ describe('rpc', () => {
 
     expect(body).toEqual({ result: 4 })
   })
+
+  it('should handle a request with keyed arguments', async () => {
+    const name = 'name'
+    const fn = ({ a, b }) => a + b
+    const method = {
+      name,
+      fn,
+    }
+    let url = await listen(createServer(rpc(method)))
+    const body = await generateRequest({
+      url,
+      name,
+      args: { a: 3, b: 1 },
+    })
+
+    expect(body).toEqual({ result: 4 })
+  })
 })
