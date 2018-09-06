@@ -203,4 +203,33 @@ describe('rpc', () => {
       })
     }
   })
+
+  it('should handle request to a method with custom status code', async () => {
+    expect.assertions(2)
+    const name = 'name'
+    const errorMessage = 'nope'
+    const statusCode = 401
+    const fn = async () => {
+      const error = new Error(errorMessage)
+      error.handled = true
+      error.statusCode = statusCode
+      throw error
+    }
+    const method = {
+      name,
+      fn,
+    }
+    try {
+      let url = await listen(createServer(rpc(method)))
+      await generateRequest({
+        url,
+        name,
+      })
+    } catch (error) {
+      expect(error.statusCode).toBe(statusCode)
+      expect(error.error).toEqual({
+        error: errorMessage,
+      })
+    }
+  })
 })

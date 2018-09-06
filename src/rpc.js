@@ -26,7 +26,7 @@ module.exports = (...methods) => (req, res, next) => {
     // handle request the same for sync or async
     promise.then(result => res.send({ result })).catch(error => {
       if (error.handled) {
-        res.status(400).send({
+        res.status(error.statusCode || 400).send({
           error: error.message,
         })
       } else {
