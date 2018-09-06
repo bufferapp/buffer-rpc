@@ -42,4 +42,38 @@ describe('index', () => {
       })
     }
   })
+
+  it('should handle an unhandled error response', async () => {
+    expect.assertions(2)
+    const name = 'someMethod'
+    const message = 'nope'
+    const errorHandler = (error, req, res, next) => {
+      if (res.headersSent) {
+        return next(error)
+      }
+      res.status(500).send({ error: error.message })
+    }
+    let url = await listen(
+      createServer(
+        rpc(
+          method(name, () => {
+            throw new Error(message)
+          }),
+        ),
+        errorHandler,
+      ),
+    )
+
+    try {
+      await generateRequest({
+        url,
+        name,
+      })
+    } catch (error) {
+      expect(error.statusCode).toBe(500)
+      expect(error.error).toEqual({
+        error: message,
+      })
+    }
+  })
 })
