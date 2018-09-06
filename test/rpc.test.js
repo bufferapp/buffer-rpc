@@ -118,4 +118,35 @@ describe('rpc', () => {
       })
     }
   })
+
+  it('should handle request to a method with expected failing function', async () => {
+    expect.assertions(2)
+    const name = 'name'
+    const errorMessage = 'nope'
+    const fn = () => {
+      throw new Error(errorMessage)
+    }
+    const method = {
+      name,
+      fn,
+    }
+    const errorHandler = (error, req, res, next) => {
+      if (res.headersSent) {
+        return next(error)
+      }
+      res.status(500).send({ error: error.message })
+    }
+    try {
+      let url = await listen(createServer(rpc(method), errorHandler))
+      await generateRequest({
+        url,
+        name,
+      })
+    } catch (error) {
+      expect(error.statusCode).toBe(500)
+      expect(error.error).toEqual({
+        error: errorMessage,
+      })
+    }
+  })
 })

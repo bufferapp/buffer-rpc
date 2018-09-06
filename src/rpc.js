@@ -9,8 +9,15 @@ module.exports = (...methods) => async (req, res, next) => {
       },
     ])
   } else if (matchingMethod) {
-    const fnResult = matchingMethod.fn()
+    let fnResult
+    try {
+      fnResult = matchingMethod.fn()
+    } catch (error) {
+      // handle sync expected failure
+      return next(error)
+    }
     if (fnResult.then) {
+      // handle async
       fnResult.then(result => res.send({ result })).catch(error => next(error))
     } else {
       res.send({ result: fnResult })
