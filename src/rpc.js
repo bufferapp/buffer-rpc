@@ -13,6 +13,10 @@ module.exports = (...methods) => (req, res, next) => {
         name: 'methods',
         docs: 'list all available methods',
       },
+      ...methods.map(({ name, docs }) => ({
+        name,
+        docs,
+      })),
     ])
   } else if (matchingMethod) {
     const parsedArgs = args ? JSON.parse(args) : []
