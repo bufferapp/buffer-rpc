@@ -34,6 +34,31 @@ describe('rpc', () => {
       },
     ])
   })
+  it('should handle a request to methods with custom methods', async () => {
+    const name = 'name'
+    const fn = () => 'OK'
+    const docs = 'some custom method'
+    const method = {
+      name,
+      docs,
+      fn,
+    }
+    let url = await listen(createServer(rpc(method)))
+    const body = await generateRequest({
+      url,
+      name: 'methods',
+    })
+    expect(body).toEqual([
+      {
+        name: 'methods',
+        docs: 'list all available methods',
+      },
+      {
+        name,
+        docs,
+      },
+    ])
+  })
   it('should handle a request to a new method', async () => {
     const name = 'name'
     const result = 'hello, world'
