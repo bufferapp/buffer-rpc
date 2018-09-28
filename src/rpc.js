@@ -41,6 +41,7 @@ module.exports = (...methods) => (req, res, next) => {
       if (error.handled) {
         res.status(error.statusCode || 400).send({
           error: error.message,
+          code: error.code,
         })
       } else {
         next(error)

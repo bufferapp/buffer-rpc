@@ -317,4 +317,33 @@ describe('rpc', () => {
       })
     }
   })
+
+  it('should set custom error code in request body', async () => {
+    expect.assertions(1)
+    const name = 'name'
+    const errorMessage = 'nope'
+    const errorCode = 1001
+    const fn = async () => {
+      const error = new Error(errorMessage)
+      error.handled = true
+      error.code = errorCode
+      throw error
+    }
+    const method = {
+      name,
+      fn,
+    }
+    try {
+      let url = await listen(createServer(rpc(method)))
+      await generateRequest({
+        url,
+        name,
+      })
+    } catch (error) {
+      expect(error.error).toEqual({
+        error: errorMessage,
+        code: errorCode,
+      })
+    }
+  })
 })
