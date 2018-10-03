@@ -39,6 +39,39 @@ describe('index', () => {
       expect(error.statusCode).toBe(400)
       expect(error.error).toEqual({
         error: message,
+        code: 1000,
+      })
+    }
+  })
+
+  it('should handle a handled error response with custom code', async () => {
+    expect.assertions(2)
+    const name = 'someMethod'
+    const message = 'nope'
+    const code = 10001
+    let url = await listen(
+      createServer(
+        rpc(
+          method(name, () => {
+            throw createError({
+              message,
+              code,
+            })
+          }),
+        ),
+      ),
+    )
+
+    try {
+      await generateRequest({
+        url,
+        name,
+      })
+    } catch (error) {
+      expect(error.statusCode).toBe(400)
+      expect(error.error).toEqual({
+        error: message,
+        code,
       })
     }
   })

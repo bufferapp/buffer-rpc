@@ -21,9 +21,19 @@ describe('createError', () => {
     expect(error.statusCode).toBe(statusCode)
   })
 
-  it('should create an error with custom code', () => {
+  it('should create an error with default code', () => {
     const message = 'some error'
     const code = 1000
+    const error = createError({
+      message,
+    })
+    expect(error.message).toBe(message)
+    expect(error.code).toBe(code)
+  })
+
+  it('should create an error with custom code', () => {
+    const message = 'some error'
+    const code = 1001
     const error = createError({
       message,
       code,

@@ -1,4 +1,4 @@
-module.exports = ({ message, code, statusCode = 400 }) => {
+module.exports = ({ message, code = 1000, statusCode = 400 }) => {
   const error = new Error(message)
   error.handled = true
   error.code = code
