@@ -13,6 +13,8 @@ const createServer = (handler, errorHandler) => {
   return http.createServer(app)
 }
 
+const stopServer = server => server.close()
+
 const generateRequest = ({ url, name, args }) =>
   request({
     uri: url,
@@ -26,5 +28,6 @@ const generateRequest = ({ url, name, args }) =>
 
 module.exports = {
   createServer,
+  stopServer,
   generateRequest,
 }
