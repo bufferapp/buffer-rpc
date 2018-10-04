@@ -2,13 +2,14 @@ const http = require('http')
 const listen = require('test-listen')
 const express = require('express')
 const request = require('request-promise')
-const { createServer, generateRequest } = require('./utils')
+const { createServer, stopServer, generateRequest } = require('./utils')
 const rpc = require('../src/rpc')
 
 describe('rpc', () => {
   it('should handle unknown method', async () => {
     expect.assertions(2)
-    let url = await listen(createServer(rpc()))
+    const server = createServer(rpc())
+    let url = await listen(server)
     try {
       await generateRequest({
         url,
@@ -20,9 +21,11 @@ describe('rpc', () => {
         error: 'unknown method',
       })
     }
+    stopServer(server)
   })
   it('should handle a request to methods', async () => {
-    let url = await listen(createServer(rpc()))
+    const server = createServer(rpc())
+    let url = await listen(server)
     const body = await generateRequest({
       url,
       name: 'methods',
@@ -33,6 +36,7 @@ describe('rpc', () => {
         docs: 'list all available methods',
       },
     ])
+    stopServer(server)
   })
   it('should handle a request to methods with custom methods', async () => {
     const name = 'name'
@@ -43,7 +47,8 @@ describe('rpc', () => {
       docs,
       fn,
     }
-    let url = await listen(createServer(rpc(method)))
+    const server = createServer(rpc(method))
+    let url = await listen(server)
     const body = await generateRequest({
       url,
       name: 'methods',
@@ -58,6 +63,7 @@ describe('rpc', () => {
         docs,
       },
     ])
+    stopServer(server)
   })
   it('should handle a request to a new method', async () => {
     const name = 'name'
@@ -67,13 +73,15 @@ describe('rpc', () => {
       name,
       fn,
     }
-    let url = await listen(createServer(rpc(method)))
+    const server = createServer(rpc(method))
+    let url = await listen(server)
     const body = await generateRequest({
       url,
       name,
     })
 
     expect(body).toEqual({ result })
+    stopServer(server)
   })
   it('should handle request to a method with an async function', async () => {
     const name = 'name'
@@ -85,12 +93,14 @@ describe('rpc', () => {
       name,
       fn,
     }
-    let url = await listen(createServer(rpc(method)))
+    const server = createServer(rpc(method))
+    let url = await listen(server)
     const body = await generateRequest({
       url,
       name,
     })
     expect(body).toEqual({ result })
+    stopServer(server)
   })
 
   it('should handle request to a method with an unhandled failing async function', async () => {
@@ -110,8 +120,9 @@ describe('rpc', () => {
       }
       res.status(500).send({ error: error.message })
     }
+    const server = createServer(rpc(method), errorHandler)
     try {
-      let url = await listen(createServer(rpc(method), errorHandler))
+      let url = await listen(server)
       await generateRequest({
         url,
         name,
@@ -122,6 +133,7 @@ describe('rpc', () => {
         error: errorMessage,
       })
     }
+    stopServer(server)
   })
 
   it('should handle request to a method with an unhandled failing function', async () => {
@@ -141,8 +153,9 @@ describe('rpc', () => {
       }
       res.status(500).send({ error: error.message })
     }
+    const server = createServer(rpc(method), errorHandler)
     try {
-      let url = await listen(createServer(rpc(method), errorHandler))
+      let url = await listen(server)
       await generateRequest({
         url,
         name,
@@ -153,6 +166,7 @@ describe('rpc', () => {
         error: errorMessage,
       })
     }
+    stopServer(server)
   })
 
   it('should handle request to a method with a handled failing function', async () => {
@@ -168,8 +182,9 @@ describe('rpc', () => {
       name,
       fn,
     }
+    const server = createServer(rpc(method))
     try {
-      let url = await listen(createServer(rpc(method)))
+      let url = await listen(server)
       await generateRequest({
         url,
         name,
@@ -180,6 +195,7 @@ describe('rpc', () => {
         error: errorMessage,
       })
     }
+    stopServer(server)
   })
 
   it('should handle request to a method with a handled async failing function', async () => {
@@ -195,8 +211,9 @@ describe('rpc', () => {
       name,
       fn,
     }
+    const server = createServer(rpc(method))
     try {
-      let url = await listen(createServer(rpc(method)))
+      let url = await listen(server)
       await generateRequest({
         url,
         name,
@@ -207,6 +224,7 @@ describe('rpc', () => {
         error: errorMessage,
       })
     }
+    stopServer(server)
   })
 
   it('should handle request to a method with custom status code', async () => {
@@ -224,8 +242,9 @@ describe('rpc', () => {
       name,
       fn,
     }
+    const server = createServer(rpc(method))
     try {
-      let url = await listen(createServer(rpc(method)))
+      let url = await listen(server)
       await generateRequest({
         url,
         name,
@@ -236,6 +255,7 @@ describe('rpc', () => {
         error: errorMessage,
       })
     }
+    stopServer(server)
   })
 
   it('should handle a request with name in header', async () => {
@@ -246,7 +266,8 @@ describe('rpc', () => {
       name,
       fn,
     }
-    let url = await listen(createServer(rpc(method)))
+    const server = createServer(rpc(method))
+    let url = await listen(server)
     const body = await request({
       uri: url,
       method: 'POST',
@@ -257,6 +278,7 @@ describe('rpc', () => {
     })
 
     expect(body).toEqual({ result })
+    stopServer(server)
   })
 
   it('should handle a request with arguments', async () => {
@@ -266,7 +288,8 @@ describe('rpc', () => {
       name,
       fn,
     }
-    let url = await listen(createServer(rpc(method)))
+    const server = createServer(rpc(method))
+    let url = await listen(server)
     const body = await generateRequest({
       url,
       name,
@@ -274,6 +297,7 @@ describe('rpc', () => {
     })
 
     expect(body).toEqual({ result: 4 })
+    stopServer(server)
   })
 
   it('should handle a request with keyed arguments', async () => {
@@ -283,7 +307,8 @@ describe('rpc', () => {
       name,
       fn,
     }
-    let url = await listen(createServer(rpc(method)))
+    const server = createServer(rpc(method))
+    let url = await listen(server)
     const body = await generateRequest({
       url,
       name,
@@ -291,6 +316,7 @@ describe('rpc', () => {
     })
 
     expect(body).toEqual({ result: 4 })
+    stopServer(server)
   })
 
   it('should fail if parsed body is missing', async () => {
@@ -316,6 +342,7 @@ describe('rpc', () => {
         error: 'no req.body found, is app.use(bodyParser.json()) hooked up?',
       })
     }
+    stopServer(server)
   })
 
   it('should set custom error code in request body', async () => {
@@ -333,8 +360,9 @@ describe('rpc', () => {
       name,
       fn,
     }
+    const server = createServer(rpc(method))
     try {
-      let url = await listen(createServer(rpc(method)))
+      let url = await listen(server)
       await generateRequest({
         url,
         name,
@@ -345,5 +373,6 @@ describe('rpc', () => {
         code: errorCode,
       })
     }
+    stopServer(server)
   })
 })
