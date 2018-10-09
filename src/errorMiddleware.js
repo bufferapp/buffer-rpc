@@ -4,5 +4,7 @@ module.exports = (error, req, res, next) => {
   }
   res.status(500).send({
     error: error.message,
+    code: 1000,
+    handled: false,
   })
 }
