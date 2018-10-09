@@ -13,7 +13,7 @@ describe('errorMiddleware', () => {
           throw new Error(errorMessage)
         }),
       ),
-      errorMiddleware(),
+      errorMiddleware,
     )
     try {
       let url = await listen(server)
@@ -30,56 +30,24 @@ describe('errorMiddleware', () => {
     stopServer(server)
   })
 
-  it('should call before send hook before sending error response', async () => {
+  it('should not send an error response if a response has already been sent', async () => {
     const name = 'someMethod'
-    const errorMessage = 'boom'
-    const message = 'hi'
-    const beforeSend = (req, res) => res.status(200).send({ message })
+    const message = 'OK'
     const server = createServer(
       rpc(
-        method(name, () => {
-          throw new Error(errorMessage)
+        method(name, (req, res) => {
+          res.send({ message })
+          throw new Error('some error happend after sending')
         }),
       ),
-      errorMiddleware({ beforeSend }),
+      errorMiddleware,
     )
     let url = await listen(server)
     const response = await generateRequest({
       url,
       name,
     })
-    expect(response).toEqual({
-      message,
-    })
-    stopServer(server)
-  })
-
-  it('should call after send hook', async () => {
-    expect.assertions(3)
-    const name = 'someMethod'
-    const errorMessage = 'boom'
-    const afterSend = jest.fn()
-    const server = createServer(
-      rpc(
-        method(name, () => {
-          throw new Error(errorMessage)
-        }),
-      ),
-      errorMiddleware({ afterSend }),
-    )
-    try {
-      let url = await listen(server)
-      await generateRequest({
-        url,
-        name,
-      })
-    } catch (error) {
-      expect(error.statusCode).toBe(500)
-      expect(error.error).toEqual({
-        error: errorMessage,
-      })
-      expect(afterSend).toBeCalled()
-    }
+    expect(response).toEqual({ message })
     stopServer(server)
   })
 })
