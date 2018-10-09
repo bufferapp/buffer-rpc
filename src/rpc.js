@@ -38,10 +38,11 @@ module.exports = (...methods) => (req, res, next) => {
     }
     // handle request the same for sync or async
     promise.then(result => res.send({ result })).catch(error => {
-      if (error.handled) {
+      if (error.rpcError) {
         res.status(error.statusCode || 400).send({
           error: error.message,
           code: error.code,
+          handled: error.handled,
         })
       } else {
         next(error)
@@ -50,6 +51,8 @@ module.exports = (...methods) => (req, res, next) => {
   } else {
     res.status(404).send({
       error: 'unknown method',
+      code: 4040,
+      handled: true,
     })
   }
 }

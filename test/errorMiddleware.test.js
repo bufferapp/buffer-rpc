@@ -26,7 +26,7 @@ describe('errorMiddleware', () => {
       expect(error.error).toEqual({
         error: errorMessage,
         handled: false,
-        code: 1000,
+        code: 5000,
       })
     }
     stopServer(server)

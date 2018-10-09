@@ -1,6 +1,6 @@
 const listen = require('test-listen')
 const { createServer, stopServer, generateRequest } = require('./utils')
-const { rpc, method, createError } = require('../src/')
+const { rpc, method, createError, errorMiddleware } = require('../src/')
 
 describe('index', () => {
   it('should handle a response', async () => {
@@ -40,6 +40,7 @@ describe('index', () => {
       expect(error.error).toEqual({
         error: message,
         code: 1000,
+        handled: true,
       })
     }
     stopServer(server)
@@ -72,6 +73,7 @@ describe('index', () => {
       expect(error.error).toEqual({
         error: message,
         code,
+        handled: true,
       })
     }
     stopServer(server)
@@ -81,7 +83,7 @@ describe('index', () => {
     expect.assertions(2)
     const name = 'someMethod'
     const message = 'nope'
-    const errorHandler = (error, req, res, next) => {
+    const customErrorHandler = (error, req, res, next) => {
       if (res.headersSent) {
         return next(error)
       }
@@ -93,7 +95,7 @@ describe('index', () => {
           throw new Error(message)
         }),
       ),
-      errorHandler,
+      customErrorHandler,
     )
     let url = await listen(server)
 
@@ -106,6 +108,35 @@ describe('index', () => {
       expect(error.statusCode).toBe(500)
       expect(error.error).toEqual({
         error: message,
+      })
+    }
+    stopServer(server)
+  })
+
+  it('should handle an unhandled error response with error middleware', async () => {
+    expect.assertions(2)
+    const name = 'someMethod'
+    const message = 'nope'
+    const server = createServer(
+      rpc(
+        method(name, () => {
+          throw new Error(message)
+        }),
+      ),
+      errorMiddleware,
+    )
+    let url = await listen(server)
+    try {
+      await generateRequest({
+        url,
+        name,
+      })
+    } catch (error) {
+      expect(error.statusCode).toBe(500)
+      expect(error.error).toEqual({
+        error: message,
+        code: 5000,
+        handled: false,
       })
     }
     stopServer(server)
