@@ -8,6 +8,8 @@ describe('createError', () => {
     })
     expect(error.message).toBe(message)
     expect(error.statusCode).toBe(400)
+    expect(error.handled).toBe(true)
+    expect(error.rpcError).toBe(true)
   })
 
   it('should create an error with a custom status code', () => {
@@ -19,6 +21,8 @@ describe('createError', () => {
     })
     expect(error.message).toBe(message)
     expect(error.statusCode).toBe(statusCode)
+    expect(error.handled).toBe(true)
+    expect(error.rpcError).toBe(true)
   })
 
   it('should create an error with default code', () => {
@@ -29,6 +33,8 @@ describe('createError', () => {
     })
     expect(error.message).toBe(message)
     expect(error.code).toBe(code)
+    expect(error.handled).toBe(true)
+    expect(error.rpcError).toBe(true)
   })
 
   it('should create an error with custom code', () => {
@@ -40,5 +46,20 @@ describe('createError', () => {
     })
     expect(error.message).toBe(message)
     expect(error.code).toBe(code)
+    expect(error.handled).toBe(true)
+    expect(error.rpcError).toBe(true)
+  })
+
+  it('should create an error that is handled = false', () => {
+    const message = 'some error'
+    const handled = false
+    const error = createError({
+      message,
+      handled,
+    })
+    expect(error.message).toBe(message)
+    expect(error.statusCode).toBe(400)
+    expect(error.handled).toBe(handled)
+    expect(error.rpcError).toBe(true)
   })
 })

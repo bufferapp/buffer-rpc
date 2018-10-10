@@ -3,6 +3,7 @@ const listen = require('test-listen')
 const express = require('express')
 const request = require('request-promise')
 const { createServer, stopServer, generateRequest } = require('./utils')
+const createError = require('../src/createError')
 const rpc = require('../src/rpc')
 
 describe('rpc', () => {
@@ -19,6 +20,8 @@ describe('rpc', () => {
       expect(error.statusCode).toBe(404)
       expect(error.error).toEqual({
         error: 'unknown method',
+        handled: true,
+        code: 4040,
       })
     }
     stopServer(server)
@@ -174,9 +177,9 @@ describe('rpc', () => {
     const name = 'name'
     const errorMessage = 'nope'
     const fn = () => {
-      const error = new Error(errorMessage)
-      error.handled = true
-      throw error
+      throw createError({
+        message: errorMessage,
+      })
     }
     const method = {
       name,
@@ -193,6 +196,8 @@ describe('rpc', () => {
       expect(error.statusCode).toBe(400)
       expect(error.error).toEqual({
         error: errorMessage,
+        code: 1000,
+        handled: true,
       })
     }
     stopServer(server)
@@ -203,9 +208,9 @@ describe('rpc', () => {
     const name = 'name'
     const errorMessage = 'nope'
     const fn = async () => {
-      const error = new Error(errorMessage)
-      error.handled = true
-      throw error
+      throw createError({
+        message: errorMessage,
+      })
     }
     const method = {
       name,
@@ -222,6 +227,8 @@ describe('rpc', () => {
       expect(error.statusCode).toBe(400)
       expect(error.error).toEqual({
         error: errorMessage,
+        code: 1000,
+        handled: true,
       })
     }
     stopServer(server)
@@ -233,10 +240,10 @@ describe('rpc', () => {
     const errorMessage = 'nope'
     const statusCode = 401
     const fn = async () => {
-      const error = new Error(errorMessage)
-      error.handled = true
-      error.statusCode = statusCode
-      throw error
+      throw createError({
+        message: errorMessage,
+        statusCode,
+      })
     }
     const method = {
       name,
@@ -253,6 +260,8 @@ describe('rpc', () => {
       expect(error.statusCode).toBe(statusCode)
       expect(error.error).toEqual({
         error: errorMessage,
+        code: 1000,
+        handled: true,
       })
     }
     stopServer(server)
@@ -353,6 +362,7 @@ describe('rpc', () => {
     const fn = async () => {
       const error = new Error(errorMessage)
       error.handled = true
+      error.rpcError = true
       error.code = errorCode
       throw error
     }
@@ -371,6 +381,7 @@ describe('rpc', () => {
       expect(error.error).toEqual({
         error: errorMessage,
         code: errorCode,
+        handled: true,
       })
     }
     stopServer(server)
