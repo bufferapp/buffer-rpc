@@ -147,7 +147,7 @@ Takes a bunch of methods as arguments. Passes requests to right RPC endpoint
 rpc(...methods)
 ```
 
-**...methods** - _method_ - micro rpc method (see below)
+**...methods** - _method_ - rpc method (see below)
 
 ### method
 
