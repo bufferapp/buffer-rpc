@@ -191,7 +191,7 @@ statusCode = 500
 body = {
   handled: false,
   code: 5000,
-  message: 'some error message' // set from error.message
+  error: 'some error message' // set from error.message
 }
 */
 ```
