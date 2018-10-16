@@ -123,6 +123,16 @@ app.listen(port, () => console.log(`App Is Listening On Port ${port}`))
 
 ### Handled Flag
 
+To help understand what the handled flag is for lets talk about a simplified distributed system. 
+
+```
+client -> server
+```
+
+The server is the RPC endpoints and the client is the source of the request, perhaps a browser or another service.. When handled = true this means there is nothing more for the client to do, when handled = false this means there _might_ be more work to resolve an issue. So handled = false is a maybe. An example of a definite handled = true is when you make a request to an RPC endpoint that does not exist. There's no partial state to resolve. An example of handled = false would be when you have to make multiple writes to a database, the first one passes and the second one fails. You've got a partially handled failure case. The client would be notified with a handled = false and then resolve the issue by either deleting the first record or writing the second -- depends on what the application does!
+
+While this doesn't happen very often, it is more likely when we choose to use a NoSQL database since we don't have joins. That being said most of the time, you'll return an error with handled = true... especially if you're keeping RPC endpoints simple. Avoid distributed systems problems when you can!
+
 **createError** handled = true (customizable)
 
 **errorMiddleware** handled = false
