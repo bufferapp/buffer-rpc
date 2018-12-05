@@ -18,7 +18,7 @@ const mockThrowingServer = rpc(
   }),
 )
 
-describe('client integration', () => {
+describe('client-rpc integration', () => {
   let server
   let client
 
@@ -33,13 +33,13 @@ describe('client integration', () => {
   })
 
   describe('unhandled errors', () => {
-    it('returns the thrown error', () => {
+    it('receives the thrown error', () => {
       const result = client.call('unhandledError', { testArg: '' })
 
       return expect(result).rejects.toThrow('Mock Unexpected Error')
     })
 
-    it('returns a non-handled error', async () => {
+    it('receives a non-handled error', async () => {
       let result
 
       result = client.call('unhandledError', { testArg: '' })
@@ -47,17 +47,25 @@ describe('client integration', () => {
       return expect(result).rejects.toHaveProperty('handled', false)
     })
 
-    it('returns a status code', async () => {
+    it('receives a 500 status code', async () => {
       let result
 
       result = client.call('unhandledError', { testArg: '' })
 
       return expect(result).rejects.toHaveProperty('status', 500)
     })
+
+    it('receives a 5000 custom error code', async () => {
+      let result
+
+      result = client.call('unhandledError', { testArg: '' })
+
+      return expect(result).rejects.toHaveProperty('code', 5000)
+    })
   })
 
   describe('handled errors', () => {
-    it('returns a handled error', async () => {
+    it('receives a handled error', async () => {
       let result
 
       result = client.call('handledError', { testArg: '' })
@@ -65,7 +73,23 @@ describe('client integration', () => {
       return expect(result).rejects.toHaveProperty('handled', true)
     })
 
-    it('returns a custom code error', async () => {
+    it('receives a 400 status code by default', async () => {
+      let result
+
+      result = client.call('handledError', { testArg: '' })
+
+      return expect(result).rejects.toHaveProperty('status', 400)
+    })
+
+    it('receives a 1000 error code by default', async () => {
+      let result
+
+      result = client.call('handledError', { testArg: '' })
+
+      return expect(result).rejects.toHaveProperty('code', 1000)
+    })
+
+    it('receives a custom error code', async () => {
       let result
 
       result = client.call('customCode', { testArg: '' })
@@ -73,7 +97,7 @@ describe('client integration', () => {
       return expect(result).rejects.toHaveProperty('code', 1099)
     })
 
-    it('returns a specific status code', async () => {
+    it('receives a specific status code', async () => {
       let result
 
       result = client.call('401', { testArg: '' })
