@@ -6,25 +6,26 @@ const request = require('request-promise')
 const createServer = (handler, errorHandler) => {
   const app = express()
   app.use(bodyParser.json())
-  app.post('*', handler)
   if (errorHandler) {
-    app.use(errorHandler)
+    app.post('/rpc/:method?', handler, errorHandler)
+  } else {
+    app.post('/rpc/:method?', handler)
   }
   return http.createServer(app)
 }
 
 const stopServer = server => server.close()
 
-const generateRequest = ({ url, name, args }) =>
-  request({
-    uri: url,
+const generateRequest = ({ url, name, args }) => {
+  return request({
+    uri: `${url}/rpc/${name}`,
     method: 'POST',
     body: {
-      name,
       args: JSON.stringify(args),
     },
     json: true,
   })
+}
 
 module.exports = {
   createServer,

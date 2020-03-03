@@ -1,5 +1,5 @@
 const listen = require('test-listen')
-const Client = require('micro-rpc-client')
+const Client = require('@bufferapp/micro-rpc-client')
 const { createServer } = require('../utils')
 const { rpc, method, errorMiddleware, createError } = require('../../src')
 
@@ -25,7 +25,7 @@ describe('client-rpc integration', () => {
   beforeAll(async () => {
     server = await createServer(mockThrowingServer, errorMiddleware)
     const url = await listen(server)
-    client = new Client({ url })
+    client = new Client({ url: `${url}/rpc` })
   })
 
   afterAll(() => {
