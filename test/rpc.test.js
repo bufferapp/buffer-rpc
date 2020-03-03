@@ -278,10 +278,33 @@ describe('rpc', () => {
     const server = createServer(rpc(method))
     let url = await listen(server)
     const body = await request({
-      uri: url,
+      uri: `${url}/rpc`,
       method: 'POST',
       headers: {
         'x-buffer-rpc-name': name,
+      },
+      json: true,
+    })
+
+    expect(body).toEqual({ result })
+    stopServer(server)
+  })
+
+  it('should handle a request with name in the body', async () => {
+    const name = 'name'
+    const result = 'hello, world'
+    const fn = () => result
+    const method = {
+      name,
+      fn,
+    }
+    const server = createServer(rpc(method))
+    let url = await listen(server)
+    const body = await request({
+      uri: `${url}/rpc`,
+      method: 'POST',
+      body: {
+        name: 'name',
       },
       json: true,
     })
