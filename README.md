@@ -14,7 +14,7 @@ const express = require('express')
 const { rpc, method } = require('@bufferapp/buffer-rpc')
 const app = express()
 app.use(bodyParser.json()) // this is required
-app.post('/rpc', rpc(method('add', (a, b) => a + b)))
+app.post('/rpc/:method?', rpc(method('add', (a, b) => a + b)))
 const port = 3000
 app.listen(port, () => console.log(`App Is Listening On Port ${port}`))
 ```
@@ -28,7 +28,7 @@ node index.js
 Or you can use curl to call the `add` method:
 
 ```sh
-curl -H "Content-Type: application/json" -X POST -d '{"name": "add", "args": "[2, 3]"}' localhost:3000 | python -m json.tool
+curl -H "Content-Type: application/json" -X POST -d '{"args": "[2, 3]"}' localhost:3000/add | python -m json.tool
 
 # {
 #    "result": 5
