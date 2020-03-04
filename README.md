@@ -69,7 +69,7 @@ const app = express()
 app.use(bodyParser.json()) // this is required
 
 app.post(
-  '/rpc',
+  '/rpc/:method?',
   rpc(
     method('add', (a, b) => a + b),
     method(
