@@ -1,4 +1,4 @@
-module.exports = (...methods) => (req, res, next) => {
+module.exports = (...methods, utils = {}) => (req, res, next) => {
   if (!req.body) {
     return next(
       new Error('no req.body found, is app.use(bodyParser.json()) hooked up?'),
@@ -25,8 +25,8 @@ module.exports = (...methods) => (req, res, next) => {
     let promise
     try {
       const fnResult = Array.isArray(parsedArgs)
-        ? matchingMethod.fn(...parsedArgs, req, res)
-        : matchingMethod.fn(parsedArgs, req, res)
+        ? matchingMethod.fn(...parsedArgs, req, res, utils)
+        : matchingMethod.fn(parsedArgs, req, res, utils)
       // if async function set it to the promise
       if (fnResult.then) {
         promise = fnResult
