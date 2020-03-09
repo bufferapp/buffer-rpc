@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0]
+### Added
+- When composing your RPC handler you can optionally pass an dependencies to be exposed to all RPC methods. See the README section on "Dependency Injection" for more details. This support is optional and existing usage will continue to function.
+
 ## [1.0.0]
 ### Added
 - `buffer-rpc` can now receive calls in the form of `endpoint/:methodName` to allow for clearer debugging and tracing (e.g., in Chrome DevTools and DataDog). The previous method of passing the name to the RPC endpoint as one of the JSON body parameters **is still supported** but the method name in the URI takes precedence. 
