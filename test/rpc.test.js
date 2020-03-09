@@ -409,4 +409,37 @@ describe('rpc', () => {
     }
     stopServer(server)
   })
+
+  it('should handle dependency injection for rpc methods', async () => {
+    const name = 'name'
+    const fn = jest.fn((req, res, { Utility }) => {
+      return Promise.resolve(Utility.someFunc())
+    })
+    const method = {
+      name,
+      fn,
+    }
+    // method that doesn't use utils
+    const fnTwo = jest.fn(() => {
+      return Promise.resolve(true)
+    })
+    const methodTwo = {
+      name: 'methodTwo',
+      fn: fnTwo,
+    }
+    const server = createServer(
+      rpc([method, methodTwo], { Utility: { someFunc: jest.fn() } }),
+    )
+    let url = await listen(server)
+    await generateRequest({
+      url,
+      name,
+    })
+    await generateRequest({
+      url,
+      name: 'methodTwo',
+    })
+    expect(fn).toHaveBeenCalled()
+    stopServer(server)
+  })
 })
