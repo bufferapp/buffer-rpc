@@ -119,6 +119,43 @@ const port = 3000
 app.listen(port, () => console.log(`App Is Listening On Port ${port}`))
 ```
 
+## Dependency Injection
+
+To simplify the code in your RPC methods, you may want to pass some common utilities down via simple dependancy injection. To do this, you call the `rpc()` method with slightly different syntax.
+
+Instead of this (seen in the other README examples):
+
+```js
+rpc(methodOne, methodTwo, methodThree, ...);
+```
+
+Pass the methods as an `Array` and pass `utils` as a second parameter:
+
+```js
+rpc([methodOne, methodTwo, methodThree], utils);
+```
+
+Where `utils` is an `Object` that will be exposed to your RPC methods as the last parameter. For example, you might use it like this (example is simplified):
+
+```js
+// rpcHandler.js
+const { rpc } = require('@bufferapp/buffer-rpc');
+
+const PublishAPI = require('./publishAPI');
+const myMethod = require('./myMethod');
+
+module.exports = rpc([myMethod], { PublishAPI });
+
+// myMethod.js
+const { method } = require('@bufferapp/buffer-rpc');
+
+module.exports = method(
+  'myMethod',
+  'myMethodDocs',
+  (args, req, res, { PublishAPI }) => PublishAPI.fetch('/1/user.json')
+);
+```
+
 ## Error Handling
 
 ### Handled Flag
