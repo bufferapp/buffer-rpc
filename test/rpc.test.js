@@ -442,4 +442,41 @@ describe('rpc', () => {
     expect(fn).toHaveBeenCalled()
     stopServer(server)
   })
+
+  it('should notify bugsnag of errors when present', async () => {
+    expect.assertions(2)
+    const name = 'name'
+    const errorMessage = 'error for bugsnag'
+    const errorCode = 1001
+    const error = new Error(errorMessage)
+    error.handled = true
+    error.rpcError = true
+    error.code = errorCode
+    const fn = async () => {
+      throw error
+    }
+    const method = {
+      name,
+      fn,
+    }
+    const Bugsnag = { notify: jest.fn() }
+    const server = createServer(rpc(method), null, express =>
+      express.set('bugsnag', Bugsnag),
+    )
+    try {
+      let url = await listen(server)
+      await generateRequest({
+        url,
+        name,
+      })
+    } catch (err) {
+      expect(err.error).toEqual({
+        error: errorMessage,
+        code: errorCode,
+        handled: true,
+      })
+      expect(Bugsnag.notify).toHaveBeenCalledWith(error)
+    }
+    stopServer(server)
+  })
 })

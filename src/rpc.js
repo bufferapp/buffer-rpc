@@ -69,6 +69,10 @@ module.exports = (methods, utils, ...rest) => {
       // handle request the same for sync or async
       promise.then(result => res.send({ result })).catch(error => {
         if (error.rpcError) {
+          const bugsnag = req.app.get('bugsnag')
+          if (bugsnag) {
+            bugsnag.notify(error)
+          }
           res.status(error.statusCode || 400).send({
             error: error.message,
             code: error.code,

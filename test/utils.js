@@ -3,8 +3,11 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const request = require('request-promise')
 
-const createServer = (handler, errorHandler) => {
-  const app = express()
+const createServer = (handler, errorHandler, expressHandlerFunc) => {
+  let app = express()
+  if (expressHandlerFunc) {
+    app = expressHandlerFunc(app)
+  }
   app.use(bodyParser.json())
   if (errorHandler) {
     app.post('/rpc/:method?', handler, errorHandler)
