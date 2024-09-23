@@ -1,3 +1,6 @@
+# deprecated
+As of the 23rd of September 2024, `buffer-rpc` will be unmaintained and deprecated. 
+
 # buffer-rpc
 
 [![Build Status](https://travis-ci.org/bufferapp/buffer-rpc.svg?branch=master)](https://travis-ci.org/bufferapp/buffer-rpc)
